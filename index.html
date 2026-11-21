@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex">
+  <title>Nova IPTV - TV'ye Hesap Gönder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0a0d14; color: #f8fafc; padding: 18px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .card { width: 100%; max-width: 440px; background: #121722; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .brand-icon { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #6366f1, #a855f7); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #fff; }
+    h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    p.sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 18px; background: #0a0d14; padding: 5px; border-radius: 10px; }
+    .tab { flex: 1; text-align: center; padding: 9px 4px; font-size: 13px; font-weight: 600; border-radius: 7px; color: #94a3b8; cursor: pointer; border: none; background: transparent; }
+    .tab.active { background: #6366f1; color: #fff; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 6px; font-weight: 600; }
+    input, textarea { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: #0a0d14; color: #fff; font-size: 16px; outline: none; }
+    textarea { min-height: 90px; resize: vertical; }
+    input:focus, textarea:focus { border-color: #6366f1; }
+    .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+    .btn:disabled { opacity: 0.6; }
+    .pane { display: none; }
+    .pane.active { display: block; }
+    .hint { font-size: 12px; color: #94a3b8; margin-top: -6px; margin-bottom: 12px; line-height: 1.45; }
+    .status { margin-top: 16px; padding: 12px; border-radius: 10px; font-size: 13px; text-align: center; display: none; line-height: 1.45; }
+    .status.ok { display: block; background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .status.err { display: block; background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .nopair { text-align: center; font-size: 14px; color: #fca5a5; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">▶</div>
+      <div>
+        <h1>NOVA IPTV</h1>
+        <p class="sub">TV'ye Hesap Gönder</p>
+      </div>
+    </div>
+
+    <div id="no-pair" class="nopair" style="display:none;">
+      ⚠️ Eşleşme kodu bulunamadı.<br>Lütfen TV'deki <b>QR kodu</b> telefonunuzun kamerasıyla tekrar okutun.
+    </div>
+
+    <div id="pair-ui">
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="quick">⚡ Hızlı</button>
+        <button type="button" class="tab" data-tab="xtream">Xtream</button>
+        <button type="button" class="tab" data-tab="mac">MAC</button>
+        <button type="button" class="tab" data-tab="file">📁 Dosya</button>
+      </div>
+
+      <div id="pane-quick" class="pane active">
+        <div class="form-group">
+          <label>M3U / Xtream Linkini Yapıştırın</label>
+          <textarea id="q-text" placeholder="http://sunucu.com:8080/get.php?username=...&password=...&type=m3u_plus"></textarea>
+        </div>
+        <p class="hint">Sağlayıcınızın verdiği linki olduğu gibi yapıştırmanız yeterli. Kullanıcı adı / şifre içeren linkler otomatik Xtream hesabı olarak eklenir.</p>
+        <button type="button" class="btn" data-send="quick">🚀 TV'ye Gönder</button>
+      </div>
+
+      <div id="pane-xtream" class="pane">
+        <div class="form-group">
+          <label>Hesap Adı</label>
+          <input type="text" id="x-name" value="Mobil Xtream">
+        </div>
+        <div class="form-group">
+          <label>Sunucu Adresi</label>
+          <input type="url" id="x-server" placeholder="http://sunucuadresi.com:8080" autocapitalize="off" autocorrect="off">
+        </div>
+        <div class="form-group">
+          <label>Kullanıcı Adı</label>
+          <input type="text" id="x-user" autocapitalize="off" autocorrect="off">
+        </div>
+        <div class="form-group">
+          <label>Şifre</label>
+          <input type="text" id="x-pass" autocapitalize="off" autocorrect="off">
+        </div>
+        <button type="button" class="btn" data-send="xtream">🚀 TV'ye Gönder</button>
+      </div>
+
+      <div id="pane-mac" class="pane">
+        <div class="form-group">
+          <label>Portal Adı</label>
+          <input type="text" id="c-name" value="Mobil Portal">
+        </div>
+        <div class="form-group">
+          <label>Portal URL</label>
+          <input type="url" id="c-url" placeholder="http://portal.domain.com:8080/c/" autocapitalize="off" autocorrect="off">
+        </div>
+        <div class="form-group">
+          <label>MAC Adresi (isteğe bağlı)</label>
+          <input type="text" id="c-mac" placeholder="00:1A:79:XX:XX:XX" autocapitalize="characters" autocorrect="off">
+        </div>
+        <button type="button" class="btn" data-send="mac">🚀 TV'ye Gönder</button>
+      </div>
+
+      <div id="pane-file" class="pane">
+        <div class="form-group">
+          <label>Liste Adı</label>
+          <input type="text" id="f-name" value="Telefondan M3U">
+        </div>
+        <div class="form-group">
+          <label>.m3u / .m3u8 dosyası seçin</label>
+          <input type="file" id="f-file" accept=".m3u,.m3u8,.txt" style="padding: 10px; background: #161d2b;">
+        </div>
+        <button type="button" class="btn" data-send="file">🚀 Dosyayı TV'ye Gönder</button>
+      </div>
+
+      <div id="status-box" class="status"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var topic = (location.hash || '').replace(/^#/, '').trim();
+      if (!topic) {
+        var m = location.search.match(/[?&]t=([^&]+)/);
+        if (m) topic = decodeURIComponent(m[1]);
+      }
+      if (!/^nova_tv_[a-z0-9]{6,40}$/i.test(topic)) {
+        document.getElementById('pair-ui').style.display = 'none';
+        document.getElementById('no-pair').style.display = 'block';
+        return;
+      }
+
+      function $(id) { return document.getElementById(id); }
+      function val(id) { var el = $(id); return el ? el.value.trim() : ''; }
+
+      function showMsg(text, isOk) {
+        var box = $('status-box');
+        box.className = 'status ' + (isOk ? 'ok' : 'err');
+        box.textContent = text;
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (btn) {
+        btn.addEventListener('click', function () {
+          var tab = btn.getAttribute('data-tab');
+          Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (b) {
+            b.classList.toggle('active', b === btn);
+          });
+          Array.prototype.forEach.call(document.querySelectorAll('.pane'), function (p) {
+            p.classList.toggle('active', p.id === 'pane-' + tab);
+          });
+          $('status-box').className = 'status';
+        });
+      });
+
+      var sending = false;
+      function postPayload(data) {
+        if (sending) return;
+        sending = true;
+        var btns = document.querySelectorAll('[data-send]');
+        Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
+        showMsg('⏳ TV\'ye gönderiliyor...', true);
+        fetch('https://ntfy.sh/' + topic, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+          body: JSON.stringify(data)
+        }).then(function (res) {
+          if (res.ok) {
+            showMsg('✅ Gönderildi! Birkaç saniye içinde TV ekranında otomatik olarak eklenecek. (TV\'de QR ekranı açık olmalı)', true);
+          } else {
+            showMsg('❌ Gönderim hatası: HTTP ' + res.status, false);
+          }
+        }).catch(function (e) {
+          showMsg('❌ Bağlantı hatası: ' + e.message, false);
+        }).then(function () {
+          sending = false;
+          Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+        });
+      }
+
+      var senders = {
+        quick: function () {
+          var text = val('q-text');
+          if (!text) return showMsg('Lütfen bir link yapıştırın!', false);
+          // TV tarafı ham metni de anlar (link, sunucu|kullanıcı|şifre, #EXTM3U)
+          postPayload({ type: 'raw', text: text });
+        },
+        xtream: function () {
+          var server = val('x-server'), username = val('x-user'), password = val('x-pass');
+          if (!server || !username || !password) return showMsg('Lütfen sunucu, kullanıcı adı ve şifre girin!', false);
+          if (!/^https?:\/\//i.test(server)) server = 'http://' + server;
+          postPayload({ type: 'xtream', name: val('x-name') || 'Mobil Xtream', server: server, username: username, password: password });
+        },
+        mac: function () {
+          var portal = val('c-url');
+          if (!portal) return showMsg('Lütfen Portal URL girin!', false);
+          postPayload({ type: 'mac', name: val('c-name') || 'Mobil Portal', portal: portal, mac: val('c-mac') });
+        },
+        file: function () {
+          var input = $('f-file');
+          if (!input.files || !input.files.length) return showMsg('Lütfen önce bir .m3u dosyası seçin!', false);
+          showMsg('⏳ Dosya okunuyor...', true);
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var text = e.target.result || '';
+            if (text.indexOf('#EXT') === -1) return showMsg('❌ Seçilen dosya geçerli bir M3U listesi değil!', false);
+            postPayload({ type: 'local_file', name: val('f-name') || 'Telefondan M3U', content: text });
+          };
+          reader.onerror = function () { showMsg('❌ Dosya okunamadı!', false); };
+          reader.readAsText(input.files[0]);
+        }
+      };
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-send]'), function (btn) {
+        btn.addEventListener('click', function () { senders[btn.getAttribute('data-send')](); });
+      });
+    })();
+  </script>
+</body>
+</html>
